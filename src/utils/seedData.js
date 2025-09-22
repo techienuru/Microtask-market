@@ -5,7 +5,7 @@ export const SEED_USERS = [
   {
     id: "user1",
     name: "Aunty Z",
-    email: "aunty.z@example.com",
+    email: "auntyz@example.com",
     phone: "080-300-0001",
     completedCount: 5,
     trusted: true,
