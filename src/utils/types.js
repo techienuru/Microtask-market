@@ -4,10 +4,12 @@
  * @typedef {Object} User
  * @property {string} id
  * @property {string} name
+ * @property {string} email
  * @property {string} phone
  * @property {number} completedCount
  * @property {boolean} trusted
  * @property {number} earnings
+ * @property {string} [createdAt]
  */
 
 /**

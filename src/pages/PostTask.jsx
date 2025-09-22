@@ -1,47 +1,52 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Camera } from 'lucide-react';
-import { useAppState } from '../hooks/useAppState.js';
-import { ImageUpload } from '../components/ImageUpload.jsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Calendar, MapPin, Camera } from "lucide-react";
+import { useAppState } from "../hooks/useAppState.js";
+import { ImageUpload } from "../components/ImageUpload.jsx";
 
 export const PostTask = () => {
   const navigate = useNavigate();
   const { state, addTask } = useAppState();
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    pay: '',
-    location: '',
-    dateTime: '',
-    mode: 'single',
+    title: "",
+    description: "",
+    pay: "",
+    location: "",
+    dateTime: "",
+    mode: "single",
     proofRequired: true,
-    escrowRequired: false
+    escrowRequired: false,
   });
-  const [escrowProof, setEscrowProof] = useState('');
+  const [escrowProof, setEscrowProof] = useState("");
 
-  const currentUser = state.users.find(u => u.id === state.currentUserId);
+  const currentUser = state.users.find((u) => u.id === state.currentUserId);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.pay || !formData.location || !formData.dateTime) {
-      alert('Please fill in all required fields');
+
+    if (
+      !formData.title ||
+      !formData.pay ||
+      !formData.location ||
+      !formData.dateTime
+    ) {
+      alert("Please fill in all required fields");
       return;
     }
 
     const payAmount = parseFloat(formData.pay);
     if (payAmount < 0) {
-      alert('Pay amount must be positive');
+      alert("Pay amount must be positive");
       return;
     }
 
     if (payAmount >= 5000 && !formData.escrowRequired) {
-      alert('Tasks with pay ≥ ₦5000 require escrow');
+      alert("Tasks with pay ≥ ₦5000 require escrow");
       return;
     }
 
     if (formData.escrowRequired && !escrowProof) {
-      alert('Please upload transfer screenshot for escrow');
+      alert("Please upload transfer screenshot for escrow");
       return;
     }
 
@@ -53,25 +58,25 @@ export const PostTask = () => {
       location: formData.location,
       dateTime: formData.dateTime,
       mode: formData.mode,
-      status: 'active',
+      status: "active",
       posterId: state.currentUserId,
       applicants: [],
       proofRequired: formData.proofRequired,
       escrowRequired: formData.escrowRequired,
       escrowProof: escrowProof,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     addTask(newTask);
-    navigate('/');
+    navigate("/tasks");
   };
 
   const handlePayChange = (value) => {
     const payAmount = parseFloat(value) || 0;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       pay: value,
-      escrowRequired: payAmount >= 5000
+      escrowRequired: payAmount >= 5000,
     }));
   };
 
@@ -93,7 +98,9 @@ export const PostTask = () => {
           <input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, title: e.target.value }))
+            }
             placeholder="e.g., Clean market stall"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
@@ -107,7 +114,9 @@ export const PostTask = () => {
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value }))
+            }
             placeholder="Provide more details about the task..."
             className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows={3}
@@ -145,7 +154,9 @@ export const PostTask = () => {
           <input
             type="text"
             value={formData.location}
-            onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, location: e.target.value }))
+            }
             placeholder="e.g., Ikeja Market"
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
@@ -161,7 +172,9 @@ export const PostTask = () => {
           <input
             type="datetime-local"
             value={formData.dateTime}
-            onChange={(e) => setFormData(prev => ({ ...prev, dateTime: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, dateTime: e.target.value }))
+            }
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
@@ -175,22 +188,26 @@ export const PostTask = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setFormData(prev => ({ ...prev, mode: 'single' }))}
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, mode: "single" }))
+              }
               className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                formData.mode === 'single'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                formData.mode === "single"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               Single (First Come)
             </button>
             <button
               type="button"
-              onClick={() => setFormData(prev => ({ ...prev, mode: 'applications' }))}
+              onClick={() =>
+                setFormData((prev) => ({ ...prev, mode: "applications" }))
+              }
               className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                formData.mode === 'applications'
-                  ? 'border-purple-500 bg-purple-50 text-purple-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                formData.mode === "applications"
+                  ? "border-purple-500 bg-purple-50 text-purple-700"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
               Accept Applications
@@ -204,7 +221,12 @@ export const PostTask = () => {
             type="checkbox"
             id="proofRequired"
             checked={formData.proofRequired}
-            onChange={(e) => setFormData(prev => ({ ...prev, proofRequired: e.target.checked }))}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                proofRequired: e.target.checked,
+              }))
+            }
             className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
           />
           <label htmlFor="proofRequired" className="text-sm text-gray-700">
@@ -222,12 +244,13 @@ export const PostTask = () => {
               </span>
             </div>
             <p className="text-sm text-yellow-700">
-              Please upload a screenshot of your transfer to show funds are available
+              Please upload a screenshot of your transfer to show funds are
+              available
             </p>
             <ImageUpload
               label="Upload transfer screenshot"
               onImageSelect={setEscrowProof}
-              onImageRemove={() => setEscrowProof('')}
+              onImageRemove={() => setEscrowProof("")}
               currentImage={escrowProof}
             />
           </div>

@@ -24,7 +24,8 @@ A complete micro-task marketplace demo built with **React 19.1.1**, **Vite**, an
 ## 🏁 Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
+
+- Node.js 16+
 - npm or yarn
 
 ### Installation
@@ -77,11 +78,13 @@ src/
 ### Task Modes
 
 **Single Mode (First-come-first-served)**
+
 - Workers can immediately "Take job"
 - Task becomes reserved by first taker
 - Suitable for urgent or simple tasks
 
 **Applications Mode**
+
 - Up to 3 workers can apply
 - Poster reviews applications and chooses
 - Auto-pick after 30 minutes (simulated via admin)
@@ -119,11 +122,22 @@ src/
 The app comes with pre-loaded demo users:
 
 1. **Aunty Z** - Trusted user (5 completed tasks, ₦2400 earnings)
-2. **Jide** - New user (2 completed tasks, ₦800 earnings)  
+2. **Jide** - New user (2 completed tasks, ₦800 earnings)
 3. **Ngozi** - Trusted user (8 completed tasks, ₦4200 earnings)
 4. **Sani** - Task Manager (handles disputes and confirmations)
 
 ## 🎮 How to Use
+
+### Homepage
+
+Visit the root route `/` to see the landing page with:
+
+- Hero section introducing the Micro-Task Market concept
+- Feature cards explaining Quick Reserve, Apply & Choose, Proof & Pay, and Task Manager
+- Visual flow diagrams showing Simple vs Skilled task workflows
+- Links to sign up or login to access the full application
+
+### Task Board
 
 1. **Browse Tasks**: Home page shows all available tasks
 2. **Post Task**: Use the "+" button to create new tasks
@@ -145,6 +159,7 @@ The app comes with pre-loaded demo users:
 ### Deploy to Vercel (Recommended)
 
 1. **Push to GitHub:**
+
 ```bash
 # Initialize git (if not already done)
 git init
@@ -152,7 +167,7 @@ git add .
 git commit -m "Initial commit: Micro-Task Market demo"
 
 # Create GitHub repository and push
-git branch -M main  
+git branch -M main
 git remote add origin https://github.com/YOUR_USERNAME/micro-task-market.git
 git push -u origin main
 ```
@@ -167,6 +182,7 @@ git push -u origin main
 ### Deploy to Netlify
 
 1. **Build the project:**
+
 ```bash
 npm run build
 ```
@@ -201,6 +217,7 @@ npm run build
 ## 🤝 Contributing
 
 This is a demo project. For production use, consider:
+
 - Real backend API integration
 - User authentication system
 - Real payment processing (Stripe, PayStack, etc.)

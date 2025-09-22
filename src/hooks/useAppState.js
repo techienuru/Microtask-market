@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { getStoredData, saveStoredData } from '../utils/storage.js';
+import { useState } from "react";
+import { getStoredData, saveStoredData } from "../utils/storage.js";
 
 export const useAppState = () => {
   const [state, setState] = useState(getStoredData);
@@ -12,9 +12,9 @@ export const useAppState = () => {
   const updateTask = (taskId, updates) => {
     const newState = {
       ...state,
-      tasks: state.tasks.map(task => 
+      tasks: state.tasks.map((task) =>
         task.id === taskId ? { ...task, ...updates } : task
-      )
+      ),
     };
     updateState(newState);
   };
@@ -22,9 +22,9 @@ export const useAppState = () => {
   const updateUser = (userId, updates) => {
     const newState = {
       ...state,
-      users: state.users.map(user =>
+      users: state.users.map((user) =>
         user.id === userId ? { ...user, ...updates } : user
-      )
+      ),
     };
     updateState(newState);
   };
@@ -32,7 +32,15 @@ export const useAppState = () => {
   const addTask = (task) => {
     const newState = {
       ...state,
-      tasks: [...state.tasks, task]
+      tasks: [...state.tasks, task],
+    };
+    updateState(newState);
+  };
+
+  const addUser = (user) => {
+    const newState = {
+      ...state,
+      users: [...state.users, user],
     };
     updateState(newState);
   };
@@ -40,7 +48,7 @@ export const useAppState = () => {
   const addNotification = (notification) => {
     const newState = {
       ...state,
-      notifications: [...state.notifications, notification]
+      notifications: [...state.notifications, notification],
     };
     updateState(newState);
   };
@@ -56,7 +64,8 @@ export const useAppState = () => {
     updateTask,
     updateUser,
     addTask,
+    addUser,
     addNotification,
-    switchUser
+    switchUser,
   };
 };
