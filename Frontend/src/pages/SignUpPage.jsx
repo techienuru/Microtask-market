@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -8,12 +8,12 @@ import {
   Phone,
   CheckCircle,
   AlertCircle,
+  MapPin,
 } from "lucide-react";
-import { useAppState } from "../hooks/useAppState.js";
+import { useAuth } from "../contexts/AuthProvider.jsx";
 
 export const SignUpPage = () => {
-  const navigate = useNavigate();
-  const { state, addUser, switchUser } = useAppState();
+  const { register, requestOtp } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,12 +21,18 @@ export const SignUpPage = () => {
     phone: "",
     password: "",
     confirmPassword: "",
+    role: "worker",
+    lga: "",
+    neighbourhood: "",
+    agreeToTerms: false,
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtpForm, setShowOtpForm] = useState(false);
+  const [otp, setOtp] = useState("");
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,8 +74,6 @@ export const SignUpPage = () => {
       newErrors.email = "Email is required";
     } else if (!validateEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
-    } else if (state.users.some((u) => u.email === formData.email)) {
-      newErrors.email = "Email is already registered";
     }
 
     // Phone validation
@@ -77,8 +81,20 @@ export const SignUpPage = () => {
       newErrors.phone = "Phone number is required";
     } else if (!validatePhone(formData.phone)) {
       newErrors.phone = "Please enter a valid Nigerian phone number";
-    } else if (state.users.some((u) => u.phone === formData.phone)) {
-      newErrors.phone = "Phone number is already registered";
+    }
+
+    // Role validation
+    if (!formData.role) {
+      newErrors.role = "Please select a role";
+    }
+
+    // Location validation
+    if (!formData.lga.trim()) {
+      newErrors.lga = "Local Government Area is required";
+    }
+
+    if (!formData.neighbourhood.trim()) {
+      newErrors.neighbourhood = "Neighbourhood is required";
     }
 
     // Password validation
@@ -98,6 +114,11 @@ export const SignUpPage = () => {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
+    // Terms validation
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms = "You must agree to the terms and conditions";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -111,31 +132,47 @@ export const SignUpPage = () => {
 
     setIsLoading(true);
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     try {
-      const newUser = {
-        id: `user_${Date.now()}`,
+      const userData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
-        completedCount: 0,
-        trusted: false,
-        earnings: 0,
-        createdAt: new Date().toISOString(),
+        password: formData.password,
+        role: formData.role,
+        lga: formData.lga.trim(),
+        neighbourhood: formData.neighbourhood.trim(),
       };
 
-      addUser(newUser);
-      switchUser(newUser.id);
+      await register(userData);
 
-      // Success feedback
-      alert(
-        `Welcome to MicroTask, ${newUser.name}! Your account has been created successfully.`
-      );
-      navigate("/tasks");
+      // Show OTP form
+      setShowOtpForm(true);
+      await requestOtp(formData.email);
     } catch (error) {
-      setErrors({ submit: "Failed to create account. Please try again." });
+      setErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!otp.trim()) {
+      setErrors({ otp: "Please enter the OTP code" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { verifyOtp } = useAuth();
+      await verifyOtp(formData.email, otp);
+
+      alert("Account verified successfully! You can now log in.");
+      window.location.href = "/login";
+    } catch (error) {
+      setErrors({ otp: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -152,13 +189,84 @@ export const SignUpPage = () => {
 
   const passwordValidation = validatePassword(formData.password);
 
+  if (showOtpForm) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <Link
+              to="/"
+              className="text-3xl font-bold text-blue-600 mb-2 block"
+            >
+              Jobbridge
+            </Link>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Verify Your Account
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We've sent a verification code to {formData.email}
+            </p>
+          </div>
+
+          <form onSubmit={handleOtpSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Verification Code
+              </label>
+              <input
+                id="otp"
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg text-center text-lg tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="000000"
+                maxLength={6}
+              />
+              {errors.otp && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.otp}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              }`}
+            >
+              {isLoading ? "Verifying..." : "Verify Account"}
+            </button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => requestOtp(formData.email)}
+                className="text-sm text-blue-600 hover:text-blue-500"
+              >
+                Resend verification code
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <Link to="/" className="text-3xl font-bold text-blue-600 mb-2 block">
-            MicroTask
+            Jobbridge
           </Link>
           <h2 className="text-2xl font-bold text-gray-900">
             Create your account
@@ -455,6 +563,141 @@ export const SignUpPage = () => {
               </p>
             </div>
           )}
+
+          {/* Terms Agreement */}
+          <div className="flex items-start space-x-3">
+            <input
+              id="agreeToTerms"
+              name="agreeToTerms"
+              type="checkbox"
+              checked={formData.agreeToTerms}
+              onChange={(e) =>
+                handleInputChange("agreeToTerms", e.target.checked)
+              }
+              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="agreeToTerms" className="text-sm text-gray-700">
+              I agree to the{" "}
+              <a
+                href="#"
+                className="text-blue-600 hover:text-blue-500 underline"
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="#"
+                className="text-blue-600 hover:text-blue-500 underline"
+              >
+                Privacy Policy
+              </a>
+            </label>
+          </div>
+          {errors.agreeToTerms && (
+            <p className="text-sm text-red-600 flex items-center">
+              <AlertCircle size={16} className="mr-1" />
+              {errors.agreeToTerms}
+            </p>
+          )}
+
+          {/* Role */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              I want to *
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleInputChange("role", "worker")}
+                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                  formData.role === "worker"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                Find Jobs
+              </button>
+              <button
+                type="button"
+                onClick={() => handleInputChange("role", "poster")}
+                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                  formData.role === "poster"
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                Post Jobs
+              </button>
+            </div>
+            {errors.role && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle size={16} className="mr-1" />
+                {errors.role}
+              </p>
+            )}
+          </div>
+
+          {/* Location Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="lga"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                <MapPin size={16} className="inline mr-1" />
+                LGA *
+              </label>
+              <input
+                id="lga"
+                name="lga"
+                type="text"
+                required
+                value={formData.lga}
+                onChange={(e) => handleInputChange("lga", e.target.value)}
+                className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  errors.lga ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`}
+                placeholder="e.g., Lafia"
+              />
+              {errors.lga && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.lga}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="neighbourhood"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Area *
+              </label>
+              <input
+                id="neighbourhood"
+                name="neighbourhood"
+                type="text"
+                required
+                value={formData.neighbourhood}
+                onChange={(e) =>
+                  handleInputChange("neighbourhood", e.target.value)
+                }
+                className={`block w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  errors.neighbourhood
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
+                placeholder="e.g., New Market"
+              />
+              {errors.neighbourhood && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.neighbourhood}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Submit Button */}
           <button

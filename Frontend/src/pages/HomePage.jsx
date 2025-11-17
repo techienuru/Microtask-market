@@ -2,10 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Zap, Users, CheckCircle, Shield, ArrowRight } from "lucide-react";
 import { FeatureCard } from "../components/FeatureCard.jsx";
-import { useAppState } from "../hooks/useAppState.js";
+import { useAuth } from "../contexts/AuthProvider.jsx";
+import { Header } from "../components/Header.jsx";
+import { Footer } from "../components/Footer.jsx";
+
+import simpleTaskPic from "../assets/images/Simple Task flow.png";
+import skilledTaskPic from "../assets/images/Skilled Task flow.png";
 
 /**
- * Home/Landing page component for Micro-Task Market
+ * Home/Landing page component for JobBridge
  * Sections:
  * - Hero: App name, subtitle, description, CTA buttons
  * - Features: 4 feature cards explaining core functionality
@@ -13,69 +18,18 @@ import { useAppState } from "../hooks/useAppState.js";
  * - Footer: Contact info and demo notes
  */
 export const HomePage = () => {
-  const { state } = useAppState();
-  const currentUser = state.users.find((u) => u.id === state.currentUserId);
+  const { currentUser } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Signed in banner */}
-      {currentUser && (
-        <div className="bg-blue-50 border-b border-blue-200 px-4 py-2">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="text-sm text-blue-700">
-              You are signed in as{" "}
-              <span className="font-medium">{currentUser.name}</span>
-              {currentUser.trusted && (
-                <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                  Trusted
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="text-2xl font-bold text-blue-600">MicroTask</div>
-          <nav className="flex items-center space-x-4">
-            {currentUser ? (
-              <Link
-                to="/tasks"
-                className="text-blue-600 hover:text-blue-700 font-medium"
-                aria-label="Go to task board"
-              >
-                Task Board
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-gray-600 hover:text-gray-800"
-                  aria-label="Sign in to your account"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  aria-label="Create new account"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main>
         {/* Hero Section */}
         <section className="px-4 py-12 md:py-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-              Micro-Task Market
+              JobBridge
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-6">
               Fast, trusted short jobs for Nasarawa markets
@@ -162,11 +116,11 @@ export const HomePage = () => {
                 </p>
 
                 {/* Image placeholder */}
-                <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4 bg-gray-50">
-                  <span className="text-gray-500 text-sm">
-                    flowchart-simple.png
-                  </span>
-                </div>
+                <img
+                  src={simpleTaskPic}
+                  alt="Simple task flow diagram"
+                  className="w-full h-50 object-cover rounded-lg mb-4"
+                />
 
                 <div className="text-sm text-gray-700 space-y-1">
                   <p>
@@ -190,11 +144,11 @@ export const HomePage = () => {
                 </p>
 
                 {/* Image placeholder */}
-                <div className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4 bg-gray-50">
-                  <span className="text-gray-500 text-sm">
-                    flowchart-skilled.png
-                  </span>
-                </div>
+                <img
+                  src={skilledTaskPic}
+                  alt="Skilled task flow diagram"
+                  className="w-full h-50 object-cover rounded-lg mb-4"
+                />
 
                 <div className="text-sm text-gray-700 space-y-1">
                   <p>
@@ -212,26 +166,7 @@ export const HomePage = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="mb-2">
-            Team Grade 6ix — github:{" "}
-            <a
-              href="https://github.com/techienuru/Microtask-market"
-              className="text-blue-400 hover:text-blue-300 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visit project repository on GitHub"
-            >
-              https://github.com/techienuru/Microtask-market
-            </a>
-          </p>
-          <p className="text-sm text-gray-400">
-            No real payments; files stored in browser for demo.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

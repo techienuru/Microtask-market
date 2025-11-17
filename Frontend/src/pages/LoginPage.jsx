@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, AlertCircle, CheckCircle } from "lucide-react";
-import { useAppState } from "../hooks/useAppState.js";
+import { useAuth } from "../contexts/AuthProvider.jsx";
 
 export const LoginPage = () => {
-  const navigate = useNavigate();
-  const { state, switchUser } = useAppState();
+  const { login, requestOtp, verifyOtp } = useAuth();
 
   const [formData, setFormData] = useState({
-    email: "",
+    identifier: "",
     password: "",
     rememberMe: false,
   });
@@ -17,22 +16,31 @@ export const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showOtpLogin, setShowOtpLogin] = useState(false);
+  const [otp, setOtp] = useState("");
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+    // Identifier validation
+    if (!formData.identifier.trim()) {
+      newErrors.identifier = "Email or phone number is required";
     } else {
+      const identifier = formData.identifier.trim();
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Please enter a valid email address";
+      const phoneRegex = /^(\+234|0)[789][01]\d{8}$/;
+
+      if (
+        !emailRegex.test(identifier) &&
+        !phoneRegex.test(identifier.replace(/[-\s]/g, ""))
+      ) {
+        newErrors.identifier =
+          "Please enter a valid email address or phone number";
       }
     }
 
-    // Password validation
-    if (!formData.password) {
+    // Password validation (only if not using OTP login)
+    if (!showOtpLogin && !formData.password) {
       newErrors.password = "Password is required";
     }
 
@@ -53,29 +61,58 @@ export const LoginPage = () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     try {
-      // Find user by email (in a real app, this would be server-side authentication)
-      const user = state.users.find((u) => u.email === formData.email.trim());
+      const credentials = {
+        identifier: formData.identifier.trim(),
+        password: formData.password,
+        rememberMe: formData.rememberMe,
+      };
 
-      if (!user) {
-        setErrors({ submit: "No account found with this email address" });
-        setIsLoading(false);
-        return;
-      }
+      const response = await login(credentials);
 
-      // In a real app, you'd verify the password hash here
-      // For demo purposes, we'll simulate successful login
-      switchUser(user.id);
-
-      // Handle remember me (in a real app, this would set a longer-lived token)
-      if (formData.rememberMe) {
-        localStorage.setItem("rememberUser", user.id);
-      }
-
-      // Success feedback
-      alert(`Welcome back, ${user.name}!`);
-      navigate("/tasks");
+      alert(`Welcome back, ${response.user.name}!`);
+      window.location.href = "/tasks";
     } catch (error) {
-      setErrors({ submit: "Login failed. Please try again." });
+      setErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpLogin = async () => {
+    if (!formData.identifier.trim()) {
+      setErrors({ identifier: "Email or phone number is required" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await requestOtp(formData.identifier.trim());
+      setShowOtpLogin(true);
+      setErrors({});
+    } catch (error) {
+      setErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!otp.trim()) {
+      setErrors({ otp: "Please enter the OTP code" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await verifyOtp(formData.identifier.trim(), otp);
+      alert(`Welcome back, ${response.user.name}!`);
+      window.location.href = "/tasks";
+    } catch (error) {
+      setErrors({ otp: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -103,13 +140,82 @@ export const LoginPage = () => {
     }, 1500);
   };
 
-  const handleDemoLogin = (userEmail) => {
-    const user = state.users.find((u) => u.email === userEmail);
-    if (user) {
-      switchUser(user.id);
-      navigate("/");
-    }
-  };
+  if (showOtpLogin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <Link
+              to="/"
+              className="text-3xl font-bold text-blue-600 mb-2 block"
+            >
+              JobBridge
+            </Link>
+            <h2 className="text-2xl font-bold text-gray-900">Enter OTP Code</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              We've sent a login code to {formData.identifier}
+            </p>
+          </div>
+
+          <form onSubmit={handleOtpSubmit} className="space-y-6">
+            <div>
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Login Code
+              </label>
+              <input
+                id="otp"
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg text-center text-lg tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="000000"
+                maxLength={6}
+              />
+              {errors.otp && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <AlertCircle size={16} className="mr-1" />
+                  {errors.otp}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-colors ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              }`}
+            >
+              {isLoading ? "Signing In..." : "Sign In"}
+            </button>
+
+            <div className="text-center space-y-2">
+              <button
+                type="button"
+                onClick={() => handleOtpLogin()}
+                className="text-sm text-blue-600 hover:text-blue-500"
+              >
+                Resend code
+              </button>
+              <br />
+              <button
+                type="button"
+                onClick={() => setShowOtpLogin(false)}
+                className="text-sm text-gray-600 hover:text-gray-800"
+              >
+                Back to password login
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
@@ -117,7 +223,7 @@ export const LoginPage = () => {
         {/* Header */}
         <div className="text-center">
           <Link to="/" className="text-3xl font-bold text-blue-600 mb-2 block">
-            MicroTask
+            JobBridge
           </Link>
           <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -125,75 +231,48 @@ export const LoginPage = () => {
           </p>
         </div>
 
-        {/* Demo Users Quick Login */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">
-            Demo Quick Login
-          </h3>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleDemoLogin("aunty.z@example.com")}
-              className="text-xs bg-white border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-            >
-              Aunty Z (Trusted)
-            </button>
-            <button
-              onClick={() => handleDemoLogin("jide@example.com")}
-              className="text-xs bg-white border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-            >
-              Jide (New User)
-            </button>
-            <button
-              onClick={() => handleDemoLogin("ngozi@example.com")}
-              className="text-xs bg-white border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-            >
-              Ngozi (Trusted)
-            </button>
-            <button
-              onClick={() => handleDemoLogin("sani@example.com")}
-              className="text-xs bg-white border border-blue-200 rounded px-2 py-1 hover:bg-blue-50 transition-colors"
-            >
-              Sani (Manager)
-            </button>
-          </div>
-        </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6" noValidate>
-          {/* Email */}
+          {/* Identifier */}
           <div>
             <label
-              htmlFor="email"
+              htmlFor="identifier"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Email Address
+              Email or Phone Number
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Mail size={20} className="text-gray-400" />
               </div>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
                 required
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                value={formData.identifier}
+                onChange={(e) =>
+                  handleInputChange("identifier", e.target.value)
+                }
                 className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
+                  errors.identifier
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
                 }`}
-                placeholder="Enter your email address"
-                aria-describedby={errors.email ? "email-error" : undefined}
+                placeholder="Enter your email or phone number"
+                aria-describedby={
+                  errors.identifier ? "identifier-error" : undefined
+                }
               />
             </div>
-            {errors.email && (
+            {errors.identifier && (
               <p
-                id="email-error"
+                id="identifier-error"
                 className="mt-1 text-sm text-red-600 flex items-center"
               >
                 <AlertCircle size={16} className="mr-1" />
-                {errors.email}
+                {errors.identifier}
               </p>
             )}
           </div>
@@ -293,6 +372,18 @@ export const LoginPage = () => {
             </button>
           </div>
 
+          {/* OTP Login Option */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={handleOtpLogin}
+              disabled={isLoading}
+              className="text-sm text-blue-600 hover:text-blue-500 transition-colors disabled:text-gray-400"
+            >
+              Login with OTP instead
+            </button>
+          </div>
+
           {/* Submit Error */}
           {errors.submit && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -341,10 +432,8 @@ export const LoginPage = () => {
         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
           <p className="text-sm text-green-700 flex items-center">
             <CheckCircle size={16} className="mr-2" />
-            This is a demo app. To login with demo users, use the login buttons
-            above (under "Demo Quick Login") or input auntyz@example.com,
-            jide@example.com, ngozi@example.com, or sani@example.com as email.
-            Password can be anything.
+            This is a demo app. Use the quick login buttons above or create a
+            new account.
           </p>
         </div>
       </div>
