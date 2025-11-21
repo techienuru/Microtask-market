@@ -10,7 +10,7 @@ import {
   AlertCircle,
   MapPin,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthProvider.jsx";
+import { useAuth } from "../../contexts/AuthProvider.jsx";
 
 export const SignUpPage = () => {
   const { register, requestOtp } = useAuth();
@@ -272,7 +272,7 @@ export const SignUpPage = () => {
             Create your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join thousands of users earning money through micro-tasks
+            Join thousands of users earning money through jobBridge
           </p>
         </div>
 

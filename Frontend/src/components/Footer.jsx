@@ -7,7 +7,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-xl font-bold text-blue-400 mb-4">Jobbridge</h3>
+            <h3 className="text-xl font-bold text-blue-400 mb-4">JobBridge</h3>
             <p className="text-gray-300 mb-4">
               Connecting local workers with short-term jobs in Nasarawa markets.
               Fast, trusted, and community-focused.
@@ -82,8 +82,7 @@ export const Footer = () => {
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center">
           <p className="text-sm text-gray-400">
-            © 2025 Jobbridge. Demo application - no real payments processed. All
-            data stored locally for demonstration purposes.
+            © 2025 JobBridge. Earn real cash even without skills.
           </p>
         </div>
       </div>

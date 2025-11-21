@@ -1,21 +1,21 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { Phone, Award, CheckCircle } from 'lucide-react';
-import { useAppState } from '../hooks/useAppState.js';
+import React from "react";
+import { useParams } from "react-router-dom";
+import { Phone, Award, CheckCircle } from "lucide-react";
+import { useAppState } from "../../hooks/useAppState.js";
 
 export const ProfilePage = () => {
   const { id } = useParams();
   const { state } = useAppState();
 
-  const user = state.users.find(u => u.id === id);
+  const user = state.users.find((u) => u.id === id);
   const isOwnProfile = id === state.currentUserId;
 
-  const userTasks = state.tasks.filter(t => 
-    t.workerId === id || t.posterId === id
+  const userTasks = state.tasks.filter(
+    (t) => t.workerId === id || t.posterId === id
   );
 
-  const completedTasks = userTasks.filter(t => t.status === 'paid');
-  const postedTasks = userTasks.filter(t => t.posterId === id);
+  const completedTasks = userTasks.filter((t) => t.status === "paid");
+  const postedTasks = userTasks.filter((t) => t.posterId === id);
 
   if (!user) {
     return <div className="text-center py-8">User not found</div>;
@@ -30,9 +30,9 @@ export const ProfilePage = () => {
             {user.name.charAt(0)}
           </span>
         </div>
-        
+
         <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-        
+
         <div className="flex items-center justify-center space-x-2 mt-2">
           <Phone size={16} className="text-gray-500" />
           <span className="text-gray-600">{user.phone}</span>
@@ -56,7 +56,7 @@ export const ProfilePage = () => {
           </div>
           <div className="text-sm text-gray-600">Tasks Completed</div>
         </div>
-        
+
         <div className="bg-white rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-green-600">
             ₦{user.earnings.toLocaleString()}
@@ -68,7 +68,7 @@ export const ProfilePage = () => {
       {/* Trust Status */}
       <div className="bg-white rounded-lg p-4">
         <h3 className="font-semibold text-gray-900 mb-3">Trust Status</h3>
-        
+
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Completed Tasks</span>
@@ -81,23 +81,24 @@ export const ProfilePage = () => {
               )}
             </div>
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className={`h-2 rounded-full ${
-                user.trusted ? 'bg-green-600' : 'bg-blue-600'
+                user.trusted ? "bg-green-600" : "bg-blue-600"
               }`}
-              style={{ 
-                width: `${Math.min((user.completedCount / 3) * 100, 100)}%` 
+              style={{
+                width: `${Math.min((user.completedCount / 3) * 100, 100)}%`,
               }}
             />
           </div>
-          
+
           <p className="text-xs text-gray-500">
-            {user.trusted 
-              ? 'This user has earned the Trusted badge!' 
-              : `${3 - user.completedCount} more completed tasks to become Trusted`
-            }
+            {user.trusted
+              ? "This user has earned the Trusted badge!"
+              : `${
+                  3 - user.completedCount
+                } more completed tasks to become Trusted`}
           </p>
         </div>
       </div>
@@ -105,17 +106,23 @@ export const ProfilePage = () => {
       {/* Recent Activity */}
       <div className="bg-white rounded-lg p-4">
         <h3 className="font-semibold text-gray-900 mb-3">Recent Activity</h3>
-        
+
         {completedTasks.length === 0 ? (
           <p className="text-gray-500 text-sm">No completed tasks yet</p>
         ) : (
           <div className="space-y-2">
-            {completedTasks.slice(0, 5).map(task => (
-              <div key={task.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+            {completedTasks.slice(0, 5).map((task) => (
+              <div
+                key={task.id}
+                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+              >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {task.title}
+                  </p>
                   <p className="text-xs text-gray-500">
-                    {task.confirmedAt && new Date(task.confirmedAt).toLocaleDateString()}
+                    {task.confirmedAt &&
+                      new Date(task.confirmedAt).toLocaleDateString()}
                   </p>
                 </div>
                 <span className="text-sm font-medium text-green-600">
@@ -131,27 +138,39 @@ export const ProfilePage = () => {
       {(isOwnProfile || postedTasks.length > 0) && (
         <div className="bg-white rounded-lg p-4">
           <h3 className="font-semibold text-gray-900 mb-3">Posted Tasks</h3>
-          
+
           {postedTasks.length === 0 ? (
             <p className="text-gray-500 text-sm">No tasks posted yet</p>
           ) : (
             <div className="space-y-2">
-              {postedTasks.slice(0, 5).map(task => (
-                <div key={task.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+              {postedTasks.slice(0, 5).map((task) => (
+                <div
+                  key={task.id}
+                  className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {task.title}
+                    </p>
                     <p className="text-xs text-gray-500">
                       {new Date(task.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">₦{task.pay.toLocaleString()}</p>
-                    <p className={`text-xs ${
-                      task.status === 'paid' ? 'text-green-600' :
-                      task.status === 'completed' ? 'text-blue-600' :
-                      task.status === 'reserved' ? 'text-orange-600' :
-                      'text-gray-600'
-                    }`}>
+                    <p className="text-sm font-medium">
+                      ₦{task.pay.toLocaleString()}
+                    </p>
+                    <p
+                      className={`text-xs ${
+                        task.status === "paid"
+                          ? "text-green-600"
+                          : task.status === "completed"
+                          ? "text-blue-600"
+                          : task.status === "reserved"
+                          ? "text-orange-600"
+                          : "text-gray-600"
+                      }`}
+                    >
                       {task.status}
                     </p>
                   </div>

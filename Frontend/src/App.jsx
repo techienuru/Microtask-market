@@ -7,13 +7,17 @@ import {
 } from "react-router-dom";
 import { AuthProvider, RequireAuth } from "./contexts/AuthProvider.jsx";
 import { ToastContainer } from "./components/Toast.jsx";
-import { HomePage } from "./pages/HomePage.jsx";
-import { LoginPage } from "./pages/LoginPage.jsx";
-import { SignUpPage } from "./pages/SignUpPage.jsx";
-import { TasksPage } from "./pages/TasksPage.jsx";
+import { HomePage } from "./pages/public/HomePage.jsx";
+import { LoginPage } from "./pages/public/LoginPage.jsx";
+import { SignUpPage } from "./pages/public/SignUpPage.jsx";
+import { TasksPage } from "./pages/shared/TasksPage.jsx";
 import { PostTaskPage } from "./pages/PostTaskPage.jsx";
 import { Header } from "./components/Header.jsx";
 import { Footer } from "./components/Footer.jsx";
+import { AdminDashboard } from "./pages/admin/AdminDashboard.jsx";
+import { AdminUsers } from "./pages/admin/AdminUsers.jsx";
+import { AdminTasks } from "./pages/admin/AdminTasks.jsx";
+import { AdminSettings } from "./pages/admin/AdminSettings.jsx";
 
 function App() {
   return (
@@ -27,6 +31,61 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
 
             {/* Protected routes */}
+
+            {/* A. ADMIN */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAuth>
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <AdminDashboard />
+                    <Footer />
+                  </div>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <RequireAuth>
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <AdminUsers />
+                    <Footer />
+                  </div>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/tasks"
+              element={
+                <RequireAuth>
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <AdminTasks />
+                    <Footer />
+                  </div>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <RequireAuth>
+                  <div className="min-h-screen bg-gray-50">
+                    <Header />
+                    <AdminSettings />
+                    <Footer />
+                  </div>
+                </RequireAuth>
+              }
+            />
+
+            {/* B. TASK MANAGER */}
+            {/* C. POSTER */}
+            {/* D. SEEKER */}
+
             <Route
               path="/tasks"
               element={
@@ -138,54 +197,6 @@ function App() {
                         <p className="text-gray-600">
                           Not implemented on server yet
                         </p>
-                      </div>
-                    </main>
-                    <Footer />
-                  </div>
-                </RequireAuth>
-              }
-            />
-
-            <Route
-              path="/admin"
-              element={
-                <RequireAuth>
-                  <div className="min-h-screen bg-gray-50">
-                    <Header />
-                    <main className="max-w-6xl mx-auto px-4 py-6">
-                      <div className="text-center py-12">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                          Admin Panel
-                        </h1>
-                        <p className="text-gray-600">
-                          Not implemented on server yet
-                        </p>
-                        <div className="mt-6">
-                          <button
-                            onClick={async () => {
-                              try {
-                                const { admin } = await import("./lib/api.js");
-                                await admin.seed();
-                                if (window.showToast) {
-                                  window.showToast({
-                                    message: "Demo data seeded successfully!",
-                                    type: "success",
-                                  });
-                                }
-                              } catch (error) {
-                                if (window.showToast) {
-                                  window.showToast({
-                                    message: `Seed failed: ${error.message}`,
-                                    type: "error",
-                                  });
-                                }
-                              }
-                            }}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                          >
-                            Seed Demo Data
-                          </button>
-                        </div>
                       </div>
                     </main>
                     <Footer />

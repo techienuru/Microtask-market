@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { TaskCard } from "../components/TaskCard.jsx";
-import { tasks } from "../lib/api.js";
-import { useAuth } from "../contexts/AuthProvider.jsx";
+import { TaskCard } from "../../components/TaskCard.jsx";
+import { tasks } from "../../lib/api.js";
+import { useAuth } from "../../contexts/AuthProvider.jsx";
 
 export const TasksPage = () => {
   const { currentUser } = useAuth();

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, AlertCircle, CheckCircle } from "lucide-react";
-import { useAuth } from "../contexts/AuthProvider.jsx";
+import { useAuth } from "../../contexts/AuthProvider.jsx";
 
 export const LoginPage = () => {
   const { login, requestOtp, verifyOtp } = useAuth();
@@ -429,13 +429,13 @@ export const LoginPage = () => {
         </form>
 
         {/* Success Message for Demo */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+        {/* <div className="bg-green-50 border border-green-200 rounded-lg p-3">
           <p className="text-sm text-green-700 flex items-center">
             <CheckCircle size={16} className="mr-2" />
             This is a demo app. Use the quick login buttons above or create a
             new account.
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -76,9 +76,9 @@ export const PostTaskPage = () => {
     }
   };
 
-  if (!currentUser) {
-    return <div>Loading...</div>;
-  }
+  // if (!currentUser) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Zap, Users, CheckCircle, Shield, ArrowRight } from "lucide-react";
-import { FeatureCard } from "../components/FeatureCard.jsx";
-import { useAuth } from "../contexts/AuthProvider.jsx";
-import { Header } from "../components/Header.jsx";
-import { Footer } from "../components/Footer.jsx";
+import { FeatureCard } from "../../components/FeatureCard.jsx";
+import { useAuth } from "../../contexts/AuthProvider.jsx";
+import { Header } from "../../components/Header.jsx";
+import { Footer } from "../../components/Footer.jsx";
 
-import simpleTaskPic from "../assets/images/Simple Task flow.png";
-import skilledTaskPic from "../assets/images/Skilled Task flow.png";
+import simpleTaskPic from "../../assets/images/Simple Task flow.png";
+import skilledTaskPic from "../../assets/images/Skilled Task flow.png";
 
 /**
  * Home/Landing page component for JobBridge
@@ -62,9 +62,9 @@ export const HomePage = () => {
               </Link>
             </div>
 
-            <p className="text-sm text-gray-500">
+            {/* <p className="text-sm text-gray-500">
               Demo site: payments simulated. Use Admin → Act as to test.
-            </p>
+            </p> */}
           </div>
         </section>
 
@@ -78,7 +78,7 @@ export const HomePage = () => {
               <FeatureCard
                 icon={<Zap size={32} />}
                 title="Quick Reserve"
-                description="First-to-tap gets the task — great for fast jobs like deliveries and cleaning."
+                description="First-to-tap gets the task, great for fast jobs like deliveries and cleaning."
               />
               <FeatureCard
                 icon={<Users size={32} />}
